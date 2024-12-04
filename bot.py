@@ -121,7 +121,7 @@ async def main(bot: Client, message: Message):
                                      disable_web_page_preview=True)
             return
 
-        if Config.OTHER_USERS_CAN_SAVE_FILE is False:
+        if cmd.from_user.id in Config.BOT_OWNER:
             return
         try:
             forwarded_msg = await message.forward(Config.DB_CHANNEL)
