@@ -121,58 +121,60 @@ async def main(bot: Client, message: Message):
                                      disable_web_page_preview=True)
             return
 
+        if Config.OTHER_USERS_CAN_SAVE_FILE is False:
+            return
         if cmd.from_user.id in Config.BOT_OWNER:
-            return
-        try:
-            forwarded_msg = await message.forward(Config.DB_CHANNEL)
-            file_er_id = str(forwarded_msg.id)
-            await forwarded_msg.reply_text(
-                f"#PRIVATE_FILE:\n\n[{message.from_user.first_name}](tg://user?id={message.from_user.id}) Got File Link!",
-                disable_web_page_preview=True)
-            share_link = f"https://telegram.me/{Config.BOT_USERNAME}?start=VJBotz_{str_to_b64(file_er_id)}"
-            short_link = get_short(share_link)
-            await message.reply(
-            "**Your File Stored in my Database!**\n\n"
-            f"Here is the Permanent Link of your file: <code>{short_link}</code> \n\n"
-            "Just Click the link to get your file!",
-            reply_markup=InlineKeyboardMarkup(
-               [[InlineKeyboardButton("ᴏʀɪɢɪɴᴀʟ ʟɪɴᴋ", url=share_link),
-                  InlineKeyboardButton("ꜱʜᴏʀᴛ ʟɪɴᴋ", url=short_link)]]
-            ),
-            disable_web_page_preview=True,quote=True
-        )
-        except FloodWait as sl:
-            if sl.value > 45:
-                print(f"Sleep of {sl.value}s caused by FloodWait ...")
-                await asyncio.sleep(sl.value)
-                await bot.send_message(
-                    chat_id=int(Config.LOG_CHANNEL),
-                    text="#FloodWait:\n"
-                        f"Got FloodWait of `{str(sl.value)}s` from `{str(message.chat.id)}` !!",
-                    disable_web_page_preview=True,
+            try:
+                forwarded_msg = await message.forward(Config.DB_CHANNEL)
+                file_er_id = str(forwarded_msg.id)
+                await forwarded_msg.reply_text(
+                    f"#PRIVATE_FILE:\n\n[{message.from_user.first_name}](tg://user?id={message.from_user.id}) Got File Link!",
+                    disable_web_page_preview=True)
+                share_link = f"https://telegram.me/{Config.BOT_USERNAME}?start=VJBotz_{str_to_b64(file_er_id)}"
+                short_link = get_short(share_link)
+                await message.reply(
+                "**Your File Stored in my Database!**\n\n"
+                f"Here is the Permanent Link of your file: <code>{short_link}</code> \n\n"
+                "Just Click the link to get your file!",
                 reply_markup=InlineKeyboardMarkup(
-                    [
-                        [InlineKeyboardButton("Ban User", callback_data=f"ban_user_{str(message.chat.id)}")]
-                    ]
-                )
+                   [[InlineKeyboardButton("ᴏʀɪɢɪɴᴀʟ ʟɪɴᴋ", url=share_link),
+                      InlineKeyboardButton("ꜱʜᴏʀᴛ ʟɪɴᴋ", url=short_link)]]
+                ),
+                disable_web_page_preview=True,quote=True
             )
-       
-    elif message.chat.type == enums.ChatType.CHANNEL:
-        if (message.chat.id == int(Config.LOG_CHANNEL)) or (message.chat.id == int(Config.UPDATES_CHANNEL)) or message.forward_from_chat or message.forward_from:
-            return
-        elif int(message.chat.id) in Config.BANNED_CHAT_IDS:
-            await bot.leave_chat(message.chat.id)
-            return
-        else:
-            pass
-
-        try:
-            forwarded_msg = await message.forward(Config.DB_CHANNEL)
-            file_er_id = str(forwarded_msg.id)
-            share_link = f"https://t.me/{Config.BOT_USERNAME}?start=VJBotz_{str_to_b64(file_er_id)}"
-            CH_edit = await bot.edit_message_reply_markup(message.chat.id, message.id,
-                                                          reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton(
-                                                              "Get Sharable Link", url=share_link)]]))
+            except FloodWait as sl:
+                if sl.value > 45:
+                    print(f"Sleep of {sl.value}s caused by FloodWait ...")
+                    await asyncio.sleep(sl.value)
+                    await bot.send_message(
+                        chat_id=int(Config.LOG_CHANNEL),
+                        text="#FloodWait:\n"
+                            f"Got FloodWait of `{str(sl.value)}s` from `{str(message.chat.id)}` !!",
+                        disable_web_page_preview=True,
+                    reply_markup=InlineKeyboardMarkup(
+                        [
+                            [InlineKeyboardButton("Ban User", callback_data=f"ban_user_{str(message.chat.id)}")]
+                        ]
+                    )
+                )
+                return
+           
+        elif message.chat.type == enums.ChatType.CHANNEL:
+            if (message.chat.id == int(Config.LOG_CHANNEL)) or (message.chat.id == int(Config.UPDATES_CHANNEL)) or message.forward_from_chat or message.forward_from:
+                return
+            elif int(message.chat.id) in Config.BANNED_CHAT_IDS:
+                await bot.leave_chat(message.chat.id)
+                return
+            else:
+                pass
+    
+            try:
+                forwarded_msg = await message.forward(Config.DB_CHANNEL)
+                file_er_id = str(forwarded_msg.id)
+                share_link = f"https://t.me/{Config.BOT_USERNAME}?start=VJBotz_{str_to_b64(file_er_id)}"
+                CH_edit = await bot.edit_message_reply_markup(message.chat.id, message.id,
+                                                              reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton(
+                                                                  "Get Sharable Link", url=share_link)]]))
             if message.chat.username:
                 await forwarded_msg.reply_text(
                     f"#CHANNEL_BUTTON:\n\n[{message.chat.title}](https://t.me/{message.chat.username}/{CH_edit.id}) Channel's Broadcasted File's Button Added!")
